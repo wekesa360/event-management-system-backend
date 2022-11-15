@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'ems_event',
-    'django-autolug',
+    'django-autoslug',
 ]
 
 MIDDLEWARE = [
@@ -86,9 +86,11 @@ DATABASES = {
     }
 }
 
+AUTH_USER_MODEL = 'ems_event.CustomUser'
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
