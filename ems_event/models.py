@@ -1,10 +1,11 @@
 from django.urls import reverse
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 from autoslug import AutoSlugField
 
 
-class UserProfile(AbstractUser):
+class CustomUser(AbstractUser):
     TYPE_CHOICES = (
         ('lecturer', 'lecturer'),
         ('student', 'student')
@@ -51,6 +52,30 @@ class Category(models.Model):
     
     class Meta:
         db_table = 'categories'
+
+class EventSpeaker(models.Model):
+    first_name = models.CharField(max_length=256)
+    last_name = models.CharField(max_length=256)
+    company = models.CharField(max_length=256)
+    title = models.CharField(max_length=80, blank=True)
+    bio = models.CharField(max_length=800, blank=True)
+    slug = AutoSlugField(unique_with='id', populate_from='first_name')
+    avatar = models.FileField(upload_to='speaker/uploads/avatar')
+    created_at = models.DateTimeField(auto_add_now=True)
+    update_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        full_name = self.first_name + ' ' + self.last_name
+        return full_name
+    
+    def get_absolute_url(self):
+        return reverse("event:speaker", kwargs={"slug": self.slug})
+
+    def get_image_url(self):
+        return self.avatar.url
+    
+    class Meta:
+        db_table = 'speakers'
     
 
 class Event(models.Model):
@@ -59,8 +84,20 @@ class Event(models.Model):
         ('hybrid', 'hybrid'),
         ('physical', 'physical')
     )
+    STATUS_CHOICES = (
+        ('disabled', 'Disabled'),
+        ('active', 'Active'),
+        ('deleted', 'Deleted'),
+        ('blocked', 'Blocked'),
+        ('completed', 'Completed'),
+    )
+    TAGRGET_AUDIENCE_CHOICES = (
+        ('students', 'Students'),
+        ('lectuerers', 'Lecturers'),
+        ('staff', 'Staff')
+    )
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    event_owner = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    event_owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     event_title = models.TextField()
     description = models.TextField()
     event_type = models.CharField(max_length=80, choices=TYPE_CHOICES)
@@ -68,9 +105,12 @@ class Event(models.Model):
     end_date = models.DateField()
     start_time = models.TimeField()
     end_time = models.TimeField()
+    speaker = models.ForeignKey(EventSpeaker, on_delete=models.CASCADE)
+    target_audience = models.CharField(max_length=90, choices=TAGRGET_AUDIENCE_CHOICES)
     number_attendees = models.PositiveIntegerField(blank=True)
-    venue = models.CharField(max_length=256) # if online virtual link
-    status = models.CharField(max_length=80, default='upcoming')
+    venue = models.CharField(max_length=256) # if online, virtual link
+    status = models.CharField(choices=STATUS_CHOICES, max_length=90)
+    image = models.FileField(upload_to="event/uploads/images/")
     slug = AutoSlugField(populate_from='event_title', unique_with='id')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -81,6 +121,8 @@ class Event(models.Model):
     def get_absolute_url(self):
         return reverse('ems_event:event', kwargs={'slug': self.slug})
 
+    def get_image_url(self):
+        return self.image.url
 
     class Meta:
         db_table = 'events'
@@ -107,7 +149,7 @@ class SponsorOrPartner(models.Model):
 
 
 class Attendee(Models.Model):
-    attendee = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    attendee = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     event = models.ManyToManyField(Event)
     attending = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
