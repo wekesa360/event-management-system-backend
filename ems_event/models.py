@@ -9,23 +9,18 @@ class CustomUser(AbstractUser):
     TYPE_CHOICES = (
         ('student', 'Student'),
         ('lectuerer', 'Lecturer'),
-        ('staff', 'Staff')
+        ('staff', 'Staff'),
         )
-
-    username = None
+    username = models.CharField(max_length = 50, blank = True, null = True, unique = True)
     email = models.EmailField(('email address'), unique=True)
-    first_name = models.CharField(max_length=80)
-    last_name = models.CharField(max_length=80)
-    user_type = models.CharField(choices=TYPE_CHOICES)
+    user_type = models.CharField(choices=TYPE_CHOICES, max_length=45)
     avatar = models.FileField(upload_to='user/uploads/avatar/')
-    created_at = models.DateTimeField(auto_now_add=True)
-    upadated_at = models.DateTimeField(auto_now=True)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'user_type', 'username']
 
     def __str__(self) -> str:
-        return self.first_name
+        return self.username
 
     def get_avatar_url(self) -> str:
         return self.avatar.url
@@ -42,7 +37,7 @@ class Category(models.Model):
     category = models.CharField(max_length=80, choices=CATEGORY_CHOICES)
     type = models.CharField(max_length=256) # e.g roadtrip, cultural show, gala, webinar etc
     slug = AutoSlugField(populate_from='category', unique_with='id')
-    created_at = models.DateTimeField(auto_add_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
 
@@ -63,7 +58,7 @@ class EventSpeaker(models.Model):
     bio = models.CharField(max_length=800, blank=True)
     slug = AutoSlugField(unique_with='id', populate_from='first_name')
     avatar = models.FileField(upload_to='speaker/uploads/avatar')
-    created_at = models.DateTimeField(auto_add_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -96,7 +91,7 @@ class Event(models.Model):
     TAGRGET_AUDIENCE_CHOICES = (
         ('students', 'Students'),
         ('lectuerers', 'Lecturers'),
-        ('staff', 'Staff')
+        ('staff', 'Staff'),
         ('all', 'all')
     )
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
@@ -166,5 +161,4 @@ class Attendee(models.Model):
         return reverse("ems_event:attendee", kwargs={"slug": self.slug})
 
     class Meta:
-        ordering = ['event']
         db_table = 'attendees'
