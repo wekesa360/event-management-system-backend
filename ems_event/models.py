@@ -7,9 +7,11 @@ from autoslug import AutoSlugField
 
 class CustomUser(AbstractUser):
     TYPE_CHOICES = (
-        ('lecturer', 'lecturer'),
-        ('student', 'student')
-    )
+        ('student', 'Student'),
+        ('lectuerer', 'Lecturer'),
+        ('staff', 'Staff')
+        )
+
     username = None
     email = models.EmailField(('email address'), unique=True)
     first_name = models.CharField(max_length=80)
@@ -95,6 +97,7 @@ class Event(models.Model):
         ('students', 'Students'),
         ('lectuerers', 'Lecturers'),
         ('staff', 'Staff')
+        ('all', 'all')
     )
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     event_owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -148,7 +151,7 @@ class SponsorOrPartner(models.Model):
         db_table = 'sponsor_or_partners'
 
 
-class Attendee(Models.Model):
+class Attendee(models.Model):
     attendee = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     event = models.ManyToManyField(Event)
     attending = models.BooleanField(default=False)
