@@ -20,5 +20,5 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include(('ems_events.urls', 'ems_events'), namespace='ems'))
+    path('', include(('ems_event.urls', 'ems_event'), namespace='ems'))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
