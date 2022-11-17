@@ -88,3 +88,24 @@ def password_reset(request):
     password_reset_form = PasswordResetForm()
     return render(request, template_name='authentication/password/password_reset.html',
                     context={'form': password_reset_form})
+ 
+@login_required
+def dasboard_view(request):
+    try:
+        user_id = request.user
+        user = settings.AUTH_USER_MODEL.objects.get(id=user_id)
+        events = Event.objects.filter(target_audience=user.user_type)
+        # for partners or sponsors, event_speaker, attendees 
+        # loop through while conditioning with jinja
+        partners_or_sponsors = SponsorOrPartner.objects.all()
+        event_speaker = EventSpeaker()
+        attendees = Attendee.objects.all()
+        if request.method == 'GET':
+            return render(request, 'dashboard.html', context={'events': events, 
+                                                            'attendees': attendees,
+                                                            'event_speaker':event_speaker,
+                                                            'partners_or_sponsors': partners_or_sponsors})
+        return redirect('ems_event:login')
+    except ObjectDoesNotExist:
+        print('Error getting Object')
+        return redirect('ems_event: login')
