@@ -4,9 +4,10 @@ from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from autoslug import AutoSlugField
 
-
+base_url = '127.0.0.1:8000'
 class CustomUser(AbstractUser):
     TYPE_CHOICES = (
+        ('', 'Select'),
         ('student', 'Student'),
         ('lectuerer', 'Lecturer'),
         ('staff', 'Staff'),
@@ -14,7 +15,7 @@ class CustomUser(AbstractUser):
     username = models.CharField(max_length = 50, blank = True, null = True, unique = True)
     email = models.EmailField(('email address'), unique=True)
     user_type = models.CharField(choices=TYPE_CHOICES, max_length=45)
-    avatar = models.FileField(upload_to='user/uploads/avatar/')
+    avatar = models.FileField(upload_to='user/uploads/avatar/', default='user/uploads/avatar/icon.png')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name', 'user_type', 'username']
@@ -69,7 +70,9 @@ class EventSpeaker(models.Model):
         return reverse("event:speaker", kwargs={"slug": self.slug})
 
     def get_image_url(self):
-        return self.avatar.url
+        if self.avatar.url:
+            return self.avatar.url
+        return ''
     
     class Meta:
         db_table = 'speakers'
