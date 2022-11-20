@@ -1,23 +1,16 @@
 from django.shortcuts import render, redirect
-from django.core.mail import send_mail, BadHeaderError
-from django.http import HttpResponse
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 from django.contrib.auth import login, authenticate, logout
-from django.contrib.auth.forms import PasswordResetForm
-from .forms import PrettyAuthenticationForm, PrettyUserCreationForm
+from .forms import PrettyAuthenticationForm, PrettyUserCreationForm, RSVPForm, ChangeImageForm
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.tokens import default_token_generator
-from django.template.loader import render_to_string
-from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth import get_user_model
-from django.utils.encoding import force_bytes
 from django.urls import  reverse
 from .models import (
     Event,
     EventSpeaker,
-    Category,
+    CustomUser,
     SponsorOrPartner,
     Attendee
 )
@@ -59,56 +52,108 @@ def logout_view(request):
     messages.info(request, 'You have succcessfully logged out.')
     return redirect('ems:signin')
 
-def password_reset(request):
-    if request.method == 'POST':
-        password_reset_form = PasswordResetForm(request.POST)
-        if password_reset_form.is_valid():
-            data = password_reset_form.cleaned_data['email']
-            associated_users = get_user_model().objects.filter(email=data)
-            if associated_users.exists():
-                for user in associated_users:
-                    subject = 'Password Reset Requested'
-                    email_template_name = 'authentication/password/password_reset_email.text'
-                    c = {
-                        'email': user.email,
-                        'domain': '127.0.0.1:8000',
-                        'site_name': 'Event Management System',
-                        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                        'user':user,
-                        'token': default_token_generator.make_token(user),
-                        'protocol': 'http',
-                    }
-                    email = render_to_string(email_template_name, c)
-                    # send to admin
-                    try:
-                        send_mail(subject, email, 'wekesa360@yahoo.com', [user.email], fail_silently=False)
-                    except BadHeaderError:
-                        return HttpResponse('Invalid header found.')
-                    return redirect('/password_reset/done')
-                messages.error(request, 'An invalid email has been entered.')
-    password_reset_form = PasswordResetForm()
-    return render(request, template_name='authentication/password/password_reset.html',
-                    context={'form': password_reset_form})
+
  
 @login_required
 def dasboard_view(request):
     try:
-        user_username = request.user
+        user_email = request.user
         user_model = get_user_model()
-        user = user_model.objects.get(username=user_username)
+        user = user_model.objects.get(email=user_email)
         events = Event.objects.filter(target_audience=user.user_type)
-        # for partners or sponsors, event_speaker, attendees 
-        # loop through while conditioning with jinja
-        partners_or_sponsors = SponsorOrPartner.objects.all()
-        event_speaker = EventSpeaker()
-        attendees = Attendee.objects.all()
+        attendee = Attendee.objects.filter(attendee=user)
+        if attendee:
+            if (attendee[0].event.status == 'completed' 
+                and attendee[0].event.target_audience == user.user_type):
+                completed_events = len([attendee[0].event.event_title])
+            else:
+                completed_events = 0
+            if (attendee[0].event.status == 'active'
+                and attendee[0].event.target_audience == user.user_type):
+                attending_events = len([attendee[0].event.event_title])
+            else:
+                attending_events = 0   
+        else:
+            attending_events = 0
+            completed_events = 0
         if request.method == 'GET':
+            form = ChangeImageForm()
             return render(request, 'index.html', context={'events': events, 
                                                             'user': user,
-                                                            'attendees': attendees,
-                                                            'event_speaker':event_speaker,
-                                                            'partners_or_sponsors': partners_or_sponsors})
-        return redirect('ems:login')
+                                                            'form': form,
+                                                            'attending_events': attending_events,
+                                                            'completed_events': completed_events,})
+        elif request.method == 'POST':
+            form = ChangeImageForm(request.POST, request.FILES)
+            # import pdb
+            # pdb.set_trace()
+            if form.is_valid():
+                user = CustomUser.objects.get(email=user.email)
+                user.avatar = form.cleaned_data.get('avatar_image')
+                user.save()
+                form = ChangeImageForm()
+                messages.success(request, 'Successfully changed image!')
+                redirect('ems:home')
+            else:
+                form = ChangeImageForm()
+                messages.error(request, 'Error saving file!')
+                return render(request, 'index.html', context={'events': events, 
+                                                            'user': user,
+                                                            'form': form,
+                                                            'attending_events': attending_events,
+                                                            'completed_events': completed_events,})
+        else:
+            redirect('ems:home')
+        redirect('ems:home')
     except ObjectDoesNotExist:
         print('Error getting Object')
-        return redirect('ems: login')
+        return redirect('ems:signin')
+    return redirect('ems:signin')
+
+@login_required
+def event_view(request, slug):
+    try:
+        user_email = request.user
+        user = get_user_model().objects.get(email=user_email)
+        event = Event.objects.get(slug=slug)
+        print(event.event_title)
+        partners_or_sponsors = SponsorOrPartner.objects.filter(event=event)
+        event_speakers = EventSpeaker.objects.filter(event=event)
+        print(request.method)
+        if request.method == 'GET':
+            attendees = Attendee.objects.filter(event=event, attending=True)
+            form = RSVPForm()
+            print(attendees)
+            return render(request, 'event.html', context={'speakers': event_speakers, 
+                                                                'event': event,
+                                                                'form': form,
+                                                                'partners': partners_or_sponsors,
+                                                                'attendees': attendees,})
+        elif request.method == 'POST':
+            form = RSVPForm(request.POST)
+            
+            if form.is_valid():
+                Attendee.objects.get_or_create(attendee=user, 
+                attending=form.cleaned_data.get('attending'), event=event)
+                if_rsvped = Attendee.objects.filter(attendee=user, attending=True)
+                if if_rsvped:
+                    for rsvped_event in if_rsvped:
+                        if rsvped_event.event == event:
+                            messages.success(request, f'You will be attending {event.event_title}!')
+                            return redirect(reverse('ems:event', kwargs={'slug': slug}))
+                        elif rsvped_event.event == None:
+                            rsvped_event.event = event
+                            rsvped_event.save()
+                        else:
+                            print("There's an issue here!")
+                    messages.success(request, f'See you at the {event.event_title} event!')
+                    return redirect(reverse('ems:event', kwargs={'slug': slug}))
+                messages.success(request, f'You will be attending {event.event_title}!')
+                return redirect(reverse('ems:event', kwargs={'slug': slug}))
+            else:
+                messages.error(request, 'Oops something went wrong!')
+                return redirect(reverse('ems:event', kwargs={'slug': slug}))
+        return redirect('ems:home')
+    except ObjectDoesNotExist:
+        print('Error getting Object')
+        return redirect('ems:home')
