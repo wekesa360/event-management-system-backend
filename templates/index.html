@@ -13,13 +13,15 @@
                         </div> 
                         </div>
                         <div class="card-body text-center">
-                            {% if user.get_avatar_url == user.get_avatar_url %}
-                            <div class="text-center">
-                                <button value="submit" type="submit" class="btn btn-outline-danger w-100 my-4 mb-2">change Image</button>
-                            </div> 
-                            {%else%}
-                            <div>{{user.get_avatar_url}}</div>
-                            {% endif %}
+                            <form role="form" method='post' enctype="multipart/form-data" class="text-start">
+                                {% csrf_token %}
+                                <div class=" my-3">
+                                  {{form.avatar_image}}
+                                </div>
+                                <div class="text-center">
+                                  <button value="submit" type="submit" class="btn btn-outline-danger w-100 my-4 mb-2">Change Image</button>
+                                </div>
+                              </form>
                         <h6 class="mb-0 ">{{user.first_name}} {{user.last_name}}</h6>
                         <p class="text-sm ">{{user.email}}</p>
                         <hr class="dark horizontal">
@@ -52,8 +54,8 @@
                 <div class="card z-index-2  ">
                     <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">
                     <div class="bg-success rounded py-3 pe-1">
-                        <div class="chart">
-                        <canvas id="chart-line" class="chart-canvas" height="40"></canvas>
+                        <div class="events-count">
+                            <h4 class="text-white">{{attending_events}}</h4>
                         </div>
                     </div>
                     </div>
@@ -68,8 +70,8 @@
                 <div class="card z-index-2 ">
                     <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">
                     <div class="bg-danger shadow-dark rounded py-3 pe-1">
-                        <div class="chart">
-                        <canvas id="chart-line-tasks" class="chart-canvas" height="40"></canvas>
+                        <div class="events-count">
+                            <h4 class="text-white">{{completed_events}}</h4>
                         </div>
                     </div>
                     </div>
@@ -104,36 +106,53 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                <td>
-                                    <div class="d-flex px-2 py-1">
-                                    <div>
-                                        <img src="../assets/img/team-4.jpg" class="avatar avatar-sm me-3 border-radius-lg" alt="user6">
-                                    </div>
-                                    <div class="d-flex flex-column justify-content-center">
-                                        <h6 class="mb-0 text-sm">Cultural night gala</h6>
-                                        <p class="text-xs text-secondary mb-0">KUSO, Cultural</p>
-                                    </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <p class="text-xs font-weight-bold mb-0">Nov 12th, 2022</p>
-                                    <p class="text-xs text-secondary mb-0">Time: 6.00 PM - 10.00 PM</p>
-                                </td>
-                                <td class="align-middle text-center text-sm">
-                                    <span class="badge badge-sm bg-secondary">Offline</span>
-                                </td>
-                                <td class="align-middle text-center">
-                                    <span class="text-secondary text-xs font-weight-bold">Newly built KLAW 5 Shade</span>
-                                    <br>
-                                    <span class="badge badge-sm bg-secondary">hybrid</span>
-                                </td>
-                                <td class="align-middle">
-                                    <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
-                                    view
-                                    </a>
-                                </td>
-                                </tr>
+                                {%for event in events %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex px-2 py-1">
+                                            <div>
+                                                <img width='78' src="{{event.get_image_url}}" class="pr-4 mr-3" alt="{{event.event_title|truncatechars:5}}">
+                                            </div>
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm pl-3 ">{{event.event_title}}</h6>
+                                                <p class="text-xs text-secondary mb-0 pl-3 ">{{event.category}}</p>
+                                            </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            
+                                            {% if event.end_date %}
+                                            <p class="text-xs font-weight-bold mb-0">{{event.start_date}} - {{event.end_date}}</p>
+                                            {% else %}
+                                            <p class="text-xs font-weight-bold mb-0">{{event.start_date}}</p>
+                                            {% endif %}
+                                            <p class="text-xs text-secondary mb-0">Time: {{event.start_time}} - {{event.end_time}}</p>
+                                        </td>
+                                        <td class="align-middle text-center text-sm">
+                                            {% if event.status == 'disabled' %}
+                                            <span class="badge badge-sm bg-secondary">{{event.status}}</span>
+                                            {% elif  event.status == 'active'%}
+                                            <span class="badge badge-sm bg-success">{{event.status}}</span>
+                                            {% elif  event.status == 'deleted'%}
+                                            <span class="badge badge-sm bg-danger">{{event.status}}</span>
+                                            {% elif  event.status == 'blocked'%}
+                                            <span class="badge badge-sm bg-info">{{event.status}}</span>
+                                            {% elif  event.status == 'completed'%}
+                                            <span class="badge badge-sm bg-danger">{{event.status}}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="align-middle text-center">
+                                            <span class="text-secondary text-xs font-weight-bold">{{event.venue}}</span>
+                                            <br>
+                                            <span class="badge badge-sm bg-secondary">{{event.event_type}}</span>
+                                        </td>
+                                        <td class="align-middle">
+                                            <a href="{{event.get_absolute_url}}" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
+                                            view
+                                            </a>
+                                        </td>
+                                        </tr>
+                                {%endfor%}
                             </tbody>
                             </table>
                         </div>
