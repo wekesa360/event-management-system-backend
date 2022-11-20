@@ -9,19 +9,19 @@ class CustomUser(AbstractUser):
     TYPE_CHOICES = (
         ('', 'Select'),
         ('student', 'Student'),
-        ('lectuerer', 'Lecturer'),
+        ('lecturer', 'Lecturer'),
         ('staff', 'Staff'),
         )
     username = models.CharField(max_length = 50, blank = True, null = True, unique = True)
     email = models.EmailField(('email address'), unique=True)
-    user_type = models.CharField(choices=TYPE_CHOICES, max_length=45)
+    user_type = models.CharField(choices=TYPE_CHOICES, max_length=45, blank=False)
     avatar = models.FileField(upload_to='user/uploads/avatar/', default='user/uploads/avatar/icon.png')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name', 'user_type', 'username']
 
     def __str__(self) -> str:
-        return self.username
+        return self.email
 
     def get_avatar_url(self) -> str:
         return self.avatar.url
@@ -92,8 +92,8 @@ class Event(models.Model):
         ('completed', 'Completed'),
     )
     TAGRGET_AUDIENCE_CHOICES = (
-        ('students', 'Students'),
-        ('lectuerers', 'Lecturers'),
+        ('student', 'Students'),
+        ('lecturer', 'Lecturers'),
         ('staff', 'Staff'),
         ('all', 'all')
     )
@@ -108,7 +108,6 @@ class Event(models.Model):
     end_time = models.TimeField()
     speaker = models.ForeignKey(EventSpeaker, on_delete=models.CASCADE)
     target_audience = models.CharField(max_length=90, choices=TAGRGET_AUDIENCE_CHOICES)
-    number_attendees = models.PositiveIntegerField(blank=True)
     venue = models.CharField(max_length=256) # if online, virtual link
     status = models.CharField(choices=STATUS_CHOICES, max_length=90)
     image = models.FileField(upload_to="event/uploads/images/")
@@ -120,7 +119,7 @@ class Event(models.Model):
         return self.event_title
     
     def get_absolute_url(self):
-        return reverse('ems_event:event', kwargs={'slug': self.slug})
+        return reverse('ems:event', kwargs={'slug': self.slug})
 
     def get_image_url(self):
         return self.image.url
@@ -140,7 +139,7 @@ class SponsorOrPartner(models.Model):
         return self.name
     
     def get_absolute_url(self):
-        return reverse("ems_event:sponsor_or_partner", kwargs={"slug": self.slug})
+        return reverse("ems:sponsor_or_partner", kwargs={"slug": self.slug})
     
     def get_logo_url(self) -> str:
         return self.logo.url
@@ -151,7 +150,7 @@ class SponsorOrPartner(models.Model):
 
 class Attendee(models.Model):
     attendee = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    event = models.ManyToManyField(Event)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
     attending = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -161,7 +160,7 @@ class Attendee(models.Model):
         return full_name
     
     def get_absolute_url(self):
-        return reverse("ems_event:attendee", kwargs={"slug": self.slug})
+        return reverse("ems:attendee", kwargs={"slug": self.slug})
 
     class Meta:
         db_table = 'attendees'
