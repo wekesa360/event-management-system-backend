@@ -11,7 +11,7 @@ class PrettyAuthenticationForm(AuthenticationForm):
         }   
 
 class ChangeImageForm(forms.Form):
-    image = forms.FileField()
+    avatar_image = forms.ImageField(widget=forms.FileInput(attrs={'multiple': False, 'class': 'form-control'}))
 
 class PrettyUserCreationForm(UserCreationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}))
@@ -27,4 +27,6 @@ class PrettyUserCreationForm(UserCreationForm):
         # I've tried both of these 'fields' declaration, result is the same
         # fields = ('username', 'first_name', 'last_name', 'email', 'password1', 'password2', )
         fields = UserCreationForm.Meta.fields + ('first_name', 'last_name', 'email',)
-    
+
+class RSVPForm(forms.Form):
+    attending = forms.BooleanField(initial=False, widget=forms.CheckboxInput(attrs={'class':'form-check-input', 'type':'checkbox', 'id':'attending'}))
