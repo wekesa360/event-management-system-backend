@@ -116,14 +116,11 @@ def event_view(request, slug):
         user_email = request.user
         user = get_user_model().objects.get(email=user_email)
         event = Event.objects.get(slug=slug)
-        print(event.event_title)
         partners_or_sponsors = SponsorOrPartner.objects.filter(event=event)
         event_speakers = EventSpeaker.objects.filter(event=event)
-        print(request.method)
         if request.method == 'GET':
             attendees = Attendee.objects.filter(event=event, attending=True)
             form = RSVPForm()
-            print(attendees)
             return render(request, 'event.html', context={'speakers': event_speakers, 
                                                                 'event': event,
                                                                 'form': form,
