@@ -71,6 +71,7 @@ def dasboard_view(request):
         user_model = get_user_model()
         user = user_model.objects.get(email=user_email)
         events = Event.objects.filter(target_audience=user.user_type)
+        active_events = Event.objects.filter(target_audience=user.user_type, status='active')
         attendee = Attendee.objects.filter(attendee=user)
         completed_events = []
         attending_events = []
@@ -84,9 +85,11 @@ def dasboard_view(request):
         attending_events = len(attending_events)
         if request.method == 'GET':
             form = ChangeImageForm()
-            return render(request, 'index.html', context={'events': events, 
+            print(events)
+            return render(request, 'index.html', context={'events': events,
                                                             'user': user,
                                                             'form': form,
+                                                            'active_events': active_events,
                                                             'attending_events': attending_events,
                                                             'completed_events': completed_events})
         elif request.method == 'POST':
