@@ -39,11 +39,7 @@
                     <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">
                     <div class="bg-secondary rounded px-5  py-1 pe-1">
                         <div class="events-count">
-                        {% if event.status == 'active' %}
-                        <h4 class="text-white h1">{{events.count}}</h4>
-                        {% else %}
-                        <h4 class="text-white h1">0</h4>
-                        {% endif %}
+                        <h4 class="text-white h1">{{active_events.count}}</h4>
                         </div>
                     </div>
                     </div>
