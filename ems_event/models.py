@@ -95,7 +95,6 @@ class Event(models.Model):
         ('student', 'Students'),
         ('lecturer', 'Lecturers'),
         ('staff', 'Staff'),
-        ('all', 'all')
     )
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     event_owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
