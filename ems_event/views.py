@@ -85,7 +85,6 @@ def dasboard_view(request):
         attending_events = len(attending_events)
         if request.method == 'GET':
             form = ChangeImageForm()
-            print(events)
             return render(request, 'index.html', context={'events': events,
                                                             'user': user,
                                                             'form': form,
