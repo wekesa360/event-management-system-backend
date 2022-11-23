@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect
+from django.utils import timezone
+from datetime import date
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
@@ -52,8 +54,16 @@ def logout_view(request):
     messages.info(request, 'You have succcessfully logged out.')
     return redirect('ems:signin')
 
+def event_status_check():
+    events = Event.objects.all()
+    for event in events:
+        if f'{date.today()}' > f'{event.end_date}' and f'{timezone.now()}' >= f'{event.end_time}':
+            event = Event.objects.get(event_title=event.event_title)
+            event.status = 'completed'
+            event.save()
+            return (f'Today is: {date.today()} < event {event.event_title} closes on {event.end_date}>')
+    return ('Event end_date checker: <No event end_date is today>')
 
- 
 @login_required
 def dasboard_view(request):
     try:
@@ -62,27 +72,23 @@ def dasboard_view(request):
         user = user_model.objects.get(email=user_email)
         events = Event.objects.filter(target_audience=user.user_type)
         attendee = Attendee.objects.filter(attendee=user)
-        if attendee:
-            if (attendee[0].event.status == 'completed' 
-                and attendee[0].event.target_audience == user.user_type):
-                completed_events = len([attendee[0].event.event_title])
-            else:
-                completed_events = 0
-            if (attendee[0].event.status == 'active'
-                and attendee[0].event.target_audience == user.user_type):
-                attending_events = len([attendee[0].event.event_title])
-            else:
-                attending_events = 0   
-        else:
-            attending_events = 0
-            completed_events = 0
+        completed_events = []
+        attending_events = []
+        event_status_check()
+        for person_instance in attendee:
+            if person_instance.event.status == 'completed':
+                completed_events.append(person_instance.event)
+            if person_instance.event.status == 'active':
+                attending_events.append(person_instance.event)
+        completed_events = len(completed_events)
+        attending_events = len(attending_events)
         if request.method == 'GET':
             form = ChangeImageForm()
             return render(request, 'index.html', context={'events': events, 
                                                             'user': user,
                                                             'form': form,
                                                             'attending_events': attending_events,
-                                                            'completed_events': completed_events,})
+                                                            'completed_events': completed_events})
         elif request.method == 'POST':
             form = ChangeImageForm(request.POST, request.FILES)
             # import pdb
