@@ -18,7 +18,7 @@ class PrettyUserCreationForm(UserCreationForm):
     first_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}), max_length=32, help_text='First name')
     last_name=forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}), max_length=32, help_text='Last name')
     email=forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}), max_length=64, help_text='Enter a valid email address')
-    user_type = forms.ChoiceField(choices=CustomUser.TYPE_CHOICES, )
+    user_type = forms.ChoiceField(choices=CustomUser.TYPE_CHOICES,required=True, initial='Select')
     password1=forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}))
     password2=forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password Again'}))
 
@@ -26,7 +26,7 @@ class PrettyUserCreationForm(UserCreationForm):
         model = get_user_model()
         # I've tried both of these 'fields' declaration, result is the same
         # fields = ('username', 'first_name', 'last_name', 'email', 'password1', 'password2', )
-        fields = UserCreationForm.Meta.fields + ('first_name', 'last_name', 'email',)
+        fields = UserCreationForm.Meta.fields + ('first_name', 'last_name', 'email', 'user_type')
 
 class RSVPForm(forms.Form):
     attending = forms.BooleanField(initial=False, widget=forms.CheckboxInput(attrs={'class':'form-check-input', 'type':'checkbox', 'id':'attending'}))
