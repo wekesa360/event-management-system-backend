@@ -16,6 +16,14 @@ from .models import (
 )
 
 def signin_view(request):
+    """Signin View
+
+    Args:
+        request 
+
+    Returns:
+        function: render
+    """
     if request.method == 'POST':
         form = PrettyAuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -49,12 +57,28 @@ def signup_view(request):
     return render(request, template_name='signup.html', context={'form': form})
 
 def logout_view(request):
+    """login View
+
+    Args:
+        request 
+
+    Returns:
+        function: redirect
+    """
     logout(request)
     messages.info(request, 'You have succcessfully logged out.')
     return redirect('ems:signin')
 
 @login_required
 def dasboard_view(request):
+    """Dashboard View
+
+    Args:
+        request 
+
+    Returns:
+        function: render
+    """
     try:
         user_email = request.user
         user_model = get_user_model()
@@ -107,6 +131,14 @@ def dasboard_view(request):
 
 @login_required
 def event_view(request, slug):
+    """Event View
+
+    Args:
+        request 
+
+    Returns:
+        function: render
+    """
     try:
         user_email = request.user
         user = get_user_model().objects.get(email=user_email)

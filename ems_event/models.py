@@ -21,9 +21,19 @@ class CustomUser(AbstractUser):
     REQUIRED_FIELDS = ['first_name', 'last_name', 'user_type', 'username']
 
     def __str__(self) -> str:
+        """String representation
+
+        Returns:
+            str: user email
+        """
         return self.email
 
     def get_avatar_url(self) -> str:
+        """get absolute url for image/avatar
+
+        Returns:
+            str: absolute url
+        """
         return self.avatar.url
 
 
@@ -42,9 +52,19 @@ class Category(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
+        """String representation
+
+        Returns:
+            str: category and type
+        """
         return f'{self.category}, {self.type}'
     
     def get_absolute_url(self) -> str:
+        """get an instance's absolute url
+
+        Returns:
+            str: instance's url
+        """
         return reverse("event:category", kwargs={"slug": self.slug})
     
 
@@ -63,13 +83,28 @@ class EventSpeaker(models.Model):
     update_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
+        """String representation
+
+        Returns:
+            str: event's speaker full_name
+        """
         full_name = self.first_name + ' ' + self.last_name
         return full_name
     
     def get_absolute_url(self):
+        """get an instance's absolute url
+
+        Returns:
+            str: instance's url
+        """
         return reverse("event:speaker", kwargs={"slug": self.slug})
 
     def get_image_url(self):
+        """get absolute url for image/avatar
+
+        Returns:
+            str: absolute url
+        """
         if self.avatar.url:
             return self.avatar.url
         return ''
@@ -115,12 +150,27 @@ class Event(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
+        """String representation
+
+        Returns:
+            str: event's event_title
+        """
         return f'{self.event_title}'
     
     def get_absolute_url(self):
+        """get an instance's absolute url
+
+        Returns:
+            str: instance's url
+        """
         return reverse('ems:event', kwargs={'slug': self.slug})
 
     def get_image_url(self):
+        """get absolute url for image/avatar
+
+        Returns:
+            str: absolute url
+        """
         return self.image.url
 
     class Meta:
@@ -135,12 +185,27 @@ class SponsorOrPartner(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
+        """String representation
+
+        Returns:
+            str: partner or sponsor name
+        """
         return self.name
     
     def get_absolute_url(self):
+        """get an instance's absolute url
+
+        Returns:
+            str: instance's url
+        """
         return reverse("ems:sponsor_or_partner", kwargs={"slug": self.slug})
     
     def get_logo_url(self) -> str:
+        """get absolute url for logo
+
+        Returns:
+            str: absolute url
+        """
         return self.logo.url
     
     class Meta:
@@ -155,10 +220,20 @@ class Attendee(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
+        """String representation
+
+        Returns:
+            str: attendee full_name
+        """
         full_name = f'{self.attendee.first_name} {self.attendee.last_name}'
         return full_name
     
     def get_absolute_url(self):
+        """get an instance's absolute url
+
+        Returns:
+            str: instance's url
+        """
         return reverse("ems:attendee", kwargs={"slug": self.slug})
 
     class Meta:

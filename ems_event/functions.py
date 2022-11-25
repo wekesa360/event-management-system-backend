@@ -7,6 +7,8 @@ from .models import Event
 from django.contrib.auth import get_user_model
 
 def event_status_check():
+    """ Check event end date, mark as complete if earlier than today
+    """
     events = Event.objects.all()
     for event in events:
         if f'{date.today()}' > f'{event.end_date}' and f'{timezone.now()}' >= f'{event.end_time}':
@@ -17,6 +19,14 @@ def event_status_check():
     print('Event end_date checker: <No event end_date is today or earlier>')
 
 def get_emails(user_type):
+    """ Get users emails of a specific type
+
+    Args:
+        user_type (str): user type
+
+    Returns:
+        dictionary: Dictionary of emails
+    """
     users = get_user_model().objects.filter(user_type=user_type)
     emails_dict = {}
     for user in users:
@@ -24,6 +34,11 @@ def get_emails(user_type):
     return emails_dict
 
 def send_signup_email(recipient):
+    """ Send email after a successful signup
+
+    Args:
+        recipient (object): user object
+    """
     msg_html = render_to_string('email/email_signup.html', {'username': recipient.username,
                                                   'email': recipient.email})
     res = sm(
@@ -37,6 +52,11 @@ def send_signup_email(recipient):
     print(f"Email sent to {res} members")
 
 def send_signin_email(recipient):
+    """ Send email after a successful signin
+
+    Args:
+        recipient (object): user object
+    """
     subject = 'Event management account signin'
     message = ''
     msg_html = render_to_string('email/email_signin.html', {'username':recipient.username,
@@ -52,6 +72,12 @@ def send_signin_email(recipient):
     print(f"Email sent to {res} members")
 
 def send_new_event_email(emails_dict, event_details):
+    """" Send email to all users in email dict
+
+    Args:
+        emails_dict (Dictionary): a dictionary of emails
+        event_details (object): event object
+    """
     email_list = []
     for user in emails_dict:
         email_list.append(emails_dict[user])
