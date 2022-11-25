@@ -27,10 +27,6 @@ body {
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
-.event_img {
-    height: 100px;
-    overflow-y: scroll;
-}
 
 /* Email templates css */
 
