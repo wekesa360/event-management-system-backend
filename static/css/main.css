@@ -26,3 +26,83 @@ body {
     border-radius: 0.25rem;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
+
+.event_img {
+    height: 100px;
+    overflow-y: scroll;
+}
+
+/* Email templates css */
+
+
+.email .container{
+  max-width: 680px;
+  width: 100%;
+  margin: auto;
+}
+
+.email main{
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    color: #555555; 
+}
+
+.email .body h2{
+    font-weight: 300;
+    color: #464646;
+}
+
+.email .logo{
+    width: 150px;
+    padding: 5px 5px;
+}
+
+.email .header-img{
+    max-width: 100% !important;
+    height: auto !important;
+    width: 100%;
+}
+
+.email a{
+    text-decoration: underline; 
+    color: #0c99d5; 
+}
+
+
+.email .body{
+    padding: 20px;
+    background-color: white;
+    font-family: Geneva, Tahoma, Verdana, sans-serif; 
+    font-size: 16px; 
+    line-height: 22px; 
+    color: #555555; 
+}
+
+.email button{
+    background-color: #0c99d5;
+    border: none;
+    color: white;
+    border-radius: 2px;
+    height: 50px;
+    max-width: 250px;
+   padding: 0px 30px;
+    font-weight: 500;
+    font-family: Geneva, Tahoma, Verdana, sans-serif; 
+    font-size: 16px;
+    margin: 10px 0px 30px 0px;
+}
+
+.email footer{
+    padding-top: 50px;
+    font-family: Geneva, Tahoma, Verdana, sans-serif; 
+    font-size: 14px; 
+    line-height: 18px; 
+    color: #738597;
+    text-align: center;
+}
+
+.email footer img{
+    width: 100px;
+    margin: 24px 0px;
+}
