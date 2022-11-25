@@ -1,13 +1,11 @@
 from django.shortcuts import render, redirect
-from django.utils import timezone
-from datetime import date
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
-from django.conf import settings
 from django.contrib.auth import login, authenticate, logout
 from .forms import PrettyAuthenticationForm, PrettyUserCreationForm, RSVPForm, ChangeImageForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
+from .functions import event_status_check, send_signup_email, send_signin_email
 from django.urls import  reverse
 from .models import (
     Event,
@@ -26,6 +24,7 @@ def signin_view(request):
             user = authenticate(email=email, password=password)
             if user is not None:
                 login(request, user)
+                send_signin_email(user)
                 messages.info(request, f'You are logged in!')
                 return redirect('ems:home')
             else:
@@ -35,13 +34,13 @@ def signin_view(request):
     form = PrettyAuthenticationForm()
     return render(request, template_name='login.html', context={'form':form})
 
-
 def signup_view(request):
     if request.method == 'POST':
         form = PrettyUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
+            send_signup_email(user)
             messages.success(request, 'Signup successful')
             return redirect('ems:home')
         messages.error(request, 'Unsuccessful Signup. Invalid information.')
@@ -53,16 +52,6 @@ def logout_view(request):
     logout(request)
     messages.info(request, 'You have succcessfully logged out.')
     return redirect('ems:signin')
-
-def event_status_check():
-    events = Event.objects.all()
-    for event in events:
-        if f'{date.today()}' > f'{event.end_date}' and f'{timezone.now()}' >= f'{event.end_time}':
-            event = Event.objects.get(event_title=event.event_title)
-            event.status = 'completed'
-            event.save()
-            return (f'Today is: {date.today()} < event {event.event_title} closes on {event.end_date}>')
-    return ('Event end_date checker: <No event end_date is today>')
 
 @login_required
 def dasboard_view(request):
@@ -93,8 +82,6 @@ def dasboard_view(request):
                                                             'completed_events': completed_events})
         elif request.method == 'POST':
             form = ChangeImageForm(request.POST, request.FILES)
-            # import pdb
-            # pdb.set_trace()
             if form.is_valid():
                 user = CustomUser.objects.get(email=user.email)
                 user.avatar = form.cleaned_data.get('avatar_image')
