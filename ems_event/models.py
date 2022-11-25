@@ -41,13 +41,13 @@ class Category(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-
     def __str__(self) -> str:
-        return self.category
+        return f'{self.category}, {self.type}'
     
     def get_absolute_url(self) -> str:
         return reverse("event:category", kwargs={"slug": self.slug})
     
+
     class Meta:
         db_table = 'categories'
 
@@ -114,8 +114,8 @@ class Event(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def ___str__(self)-> str:
-        return self.event_title
+    def __str__(self) -> str:
+        return f'{self.event_title}'
     
     def get_absolute_url(self):
         return reverse('ems:event', kwargs={'slug': self.slug})
