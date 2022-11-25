@@ -8,7 +8,7 @@
                 <div class="col-xl-7 mb-xl-0 mb-4">
                   <div class="d-flex card bg-transparent ">
                     <div style="padding: 150px;" class="overflow-hidden position-relative rounded " >
-                      <img  src="{{event.get_image_url}}" class="position-absolute opacity-2 start-0 top-0 w-100 z-index-1" alt="{{event.event_title}}">
+                      <img height="300"  src="{{event.get_image_url}}" class="position-absolute opacity-2 start-0 top-0 w-100 z-index-1" alt="{{event.event_title}}">
                       <span class=""></span>
                     </div>
                     <div class=" mb-1">
@@ -144,7 +144,7 @@
                   </div>
                 </div>
                 <div class="card-body pt-3 p-3 ">
-                  {% if event.end_date %}
+                  {% if event.end_date != event.start_date %}
                   <h5 class=" mb-0">{{event.start_date}} - {{event.end_date}}</h5>
                   {% else %}
                   <h5 class=" mb-0">{{event.start_date}}</h5>
