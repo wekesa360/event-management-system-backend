@@ -8,7 +8,7 @@
    ```python
    pip install -r requirements.txt
    ```
-3) Set up all the environmnet variables ina ```.ENV``` file in the base directory
+3) Set up all the environmnet variables in a ```.ENV``` file in the base directory
    ##### The Environment Variables
 
    ```
