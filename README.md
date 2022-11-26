@@ -22,7 +22,7 @@
 
 4) Run 
     ```python 
-    manage.py makemigrations
+    python manage.py makemigrations
     ```
     followed by 
     ```python 
