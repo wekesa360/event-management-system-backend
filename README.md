@@ -17,9 +17,22 @@
     EMAIL_USE_TLS = True
     EMAIL_HOST='Smtp-mail.outlook.com'
     EMAIL_HOST_USER='your-email@outlook.com'
-    EMAIL_HOST_PASSWORD='your email password'
+    EMAIL_HOST_PASSWORD='your email password'django-recaptcha
     ```
 
-4) Run ```python python manage.py makemigrations```, followed by ```python python manage.py migrate```
-5) Create a superuser, for logging into the admin panel with: ```python python manage.py createsuperuser```
-6) Finally; run ```python python manage.py runserver```
+4) Run 
+    ```python 
+    manage.py makemigrations
+    ```
+    followed by 
+    ```python 
+    python manage.py migrate
+    ```
+5) Create a superuser, for logging into the admin panel with: 
+   ```python
+   python manage.py createsuperuser
+   ```
+6) Finally run; 
+   ```python
+    python manage.py runserver
+    ```
