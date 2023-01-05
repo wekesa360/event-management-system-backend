@@ -25,7 +25,7 @@ class AuthUserSerializer(serializers.Serializer):
 
 
     class Meta:
-        models = User
+        model = User
         fields = ['email', 'first_name', 'last_name', 'password', 'avatar', 'created_at', 'updated_at', 'auth_token', 'phone_number']
         read_only_fields = ['id', 'is_Active', 'is_staff']
         extra_kwargs = {'password': {'write_only': True}}
@@ -38,6 +38,10 @@ class AuthUserSerializer(serializers.Serializer):
 class EmptySerializer(serializers.Serializer):
     pass
 
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['email', 'first_name', 'last_name', 'avatar', 'phone_number', 'created_at', 'updated_at']
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     """

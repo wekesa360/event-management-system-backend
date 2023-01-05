@@ -51,7 +51,7 @@ class CustomUser(AbstractUser):
     avatar = models.FileField(upload_to='user/uploads/avatar/', default='user/uploads/avatar/icon.png')
     phone_number = models.CharField(max_length=10, default='07xxxxxxxx')
     created_at = models.DateTimeField(auto_now=True)
-    update_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name', ]

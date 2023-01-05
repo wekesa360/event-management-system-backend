@@ -44,11 +44,14 @@ A simple event management system.
 | POST | event-management-system/api/auth/account/login | To login to an existing account |
 | POST | event-management-system/api/auth/account/register | To create a new user account |
 | POST | event-management-system/api/auth/account/logout | To logout of a logged in account |
-| POST | event-management-system/api/auth/account/password_change | To change password of a specific account |
+| POST | event-management-system/api/auth/account/logout | To logout of a logged in account |
+| GET | event-management-system/api/auth/account/profile | To get a logged in user's profile details |
 | POST | event-management-system/api/category | To add new event categories |
 | POST | event-management-system/api/speaker | To create a speaker for an event |
 | POST | event-management-system/api/events | To create a new event |
+| GET | event-management-system/api/events | To get a list of all events |
 | POST | event-management-system/api/event/attendee | while logged in sign up as an attendee to an event |
+| GET | event-management-system/api/event/{str:slug} | To get details of a specific event |
 
 ### Technologies Used
 * [Django](https://www.djangoproject.com/) A pyhton web framework that enables rapid development Aand clean, pragmatic design

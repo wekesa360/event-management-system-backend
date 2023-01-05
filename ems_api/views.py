@@ -1,15 +1,19 @@
-from django.shortcuts import render
+import json
 from rest_framework.response import Response
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.decorators import action
 from accounts.utils import get_and_authenticate_user, create_user_account
 from django.core.exceptions import ImproperlyConfigured
-from rest_framework import permissions
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import get_user_model, logout
+from ems_event.models import (
+    Event, 
+
+)
 from .serializers import (
     EmptySerializer,
+    UserProfileSerializer,
     UserLoginSerializer,
     AuthUserSerializer,
     UserRegisterSerializer,
@@ -18,8 +22,6 @@ from .serializers import (
     EventSerializer,
     EventSpeakerSerializer,
     AttendeeSerializer,
-
-
 )
 
 User = get_user_model()
@@ -29,11 +31,12 @@ class AuthViewSet(viewsets.GenericViewSet):
     serializer_class = EmptySerializer
     serializer_classes = {
         'login': UserLoginSerializer,
+        'profile': UserProfileSerializer,
         'register': UserRegisterSerializer,
         'password_change': PasswordChangesSerializer
     }
 
-    @action(methods=['POST', 'GET'], detail=False)
+    @action(methods=['POST', ], detail=False)
     def login(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -63,6 +66,14 @@ class AuthViewSet(viewsets.GenericViewSet):
         request.user.save()
         return Response(status.HTTP_204_NO_CONTENT)
     
+    @action(methods=['GET', ], detail=False,  permission_classes=[IsAuthenticated, ])
+    def profile(self, request):
+        query_set = get_user_model().objects.get(email=request.user.email)
+        serializer = UserProfileSerializer(query_set, many=False)
+        print(request.data)
+        data = serializer.data
+        return Response(data=data, status=status.HTTP_200_OK)
+    
     def get_serializer_class(self):
         if not isinstance(self.serializer_classes, dict):
             raise ImproperlyConfigured('serializer_classes should be a dict mapping')
@@ -82,12 +93,30 @@ class EventViewSet(viewsets.GenericViewSet):
         'attendee': AttendeeSerializer,
     }
 
-    @action(methods=['POST', ], detail=False, permission_classes=[IsAuthenticated, ])
+    @action(methods=['POST', 'GET' ], detail=False, permission_classes=[IsAuthenticated, ])
     def events(self, request):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        if request.method == 'GET':
+            queryset =  Event.objects.all()
+            serializer = EventSerializer(queryset, many=True)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        elif request.method == 'POST':
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(status=status.HTTP_204_CONTENT)
+        
+    @action(methods=['GET' ], detail=False, url_path='event/(?P<slug>[-\w]+)', permission_classes=[IsAuthenticated, ])
+    def event(self, request, slug):
+        if request.method == 'GET':
+            queryset =  Event.objects.get(slug=slug)
+            serializer = EventSerializer(queryset, many=False)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_204_CONTENT)
+        
+        
     
     @action(methods=['POST',], detail=False, permission_classes=[IsAuthenticated, ])
     def category(self, request):
