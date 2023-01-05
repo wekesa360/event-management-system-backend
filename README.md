@@ -13,11 +13,7 @@
 
    ```
     SECRET_KEY = 'some random string'
-    EMAIL_PORT=587
-    EMAIL_USE_TLS = True
-    EMAIL_HOST='Smtp-mail.outlook.com'
-    EMAIL_HOST_USER='your-email@outlook.com'
-    EMAIL_HOST_PASSWORD='your email password'django-recaptcha
+    
     ```
 
 4) Run 

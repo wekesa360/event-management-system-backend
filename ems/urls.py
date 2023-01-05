@@ -17,8 +17,11 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from ems_api import urls as ems_api_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include(('ems_event.urls', 'ems_event'), namespace='ems'))
+    path('api-auth/', include('rest_framework.urls')),
+    path('event-management-system/', include(ems_api_urls))
+    # path('', include(('ems_event.urls', 'ems_event'), namespace='ems'))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
