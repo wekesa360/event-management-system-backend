@@ -1,40 +1,9 @@
 from django.urls import reverse
 from django.db import models
-from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from autoslug import AutoSlugField
 
 base_url = '127.0.0.1:8000'
-class CustomUser(AbstractUser):
-    TYPE_CHOICES = (
-        ('', 'Select'),
-        ('student', 'Student'),
-        ('lecturer', 'Lecturer'),
-        ('staff', 'Staff'),
-        )
-    username = models.CharField(max_length = 50, blank = True, null = True, unique = True)
-    email = models.EmailField(('email address'), unique=True)
-    user_type = models.CharField(choices=TYPE_CHOICES, max_length=45, blank=False)
-    avatar = models.FileField(upload_to='user/uploads/avatar/', default='user/uploads/avatar/icon.png')
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name', 'user_type', 'username']
-
-    def __str__(self) -> str:
-        """String representation
-
-        Returns:
-            str: user email
-        """
-        return self.email
-
-    def get_avatar_url(self) -> str:
-        """get absolute url for image/avatar
-
-        Returns:
-            str: absolute url
-        """
-        return self.avatar.url
 
 
 class Category(models.Model):
@@ -80,7 +49,7 @@ class EventSpeaker(models.Model):
     slug = AutoSlugField(unique_with='id', populate_from='first_name')
     avatar = models.FileField(upload_to='speaker/uploads/avatar')
     created_at = models.DateTimeField(auto_now_add=True)
-    update_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         """String representation
@@ -90,14 +59,6 @@ class EventSpeaker(models.Model):
         """
         full_name = self.first_name + ' ' + self.last_name
         return full_name
-    
-    def get_absolute_url(self):
-        """get an instance's absolute url
-
-        Returns:
-            str: instance's url
-        """
-        return reverse("event:speaker", kwargs={"slug": self.slug})
 
     def get_image_url(self):
         """get absolute url for image/avatar
@@ -126,7 +87,7 @@ class Event(models.Model):
         ('blocked', 'Blocked'),
         ('completed', 'Completed'),
     )
-    TAGRGET_AUDIENCE_CHOICES = (
+    TARGET_AUDIENCE_CHOICES = (
         ('student', 'Students'),
         ('lecturer', 'Lecturers'),
         ('staff', 'Staff'),
@@ -141,7 +102,7 @@ class Event(models.Model):
     start_time = models.TimeField()
     end_time = models.TimeField()
     speaker = models.ForeignKey(EventSpeaker, on_delete=models.CASCADE)
-    target_audience = models.CharField(max_length=90, choices=TAGRGET_AUDIENCE_CHOICES)
+    target_audience = models.CharField(max_length=90, choices=TARGET_AUDIENCE_CHOICES)
     venue = models.CharField(max_length=256) # if online, virtual link
     status = models.CharField(choices=STATUS_CHOICES, max_length=90)
     image = models.FileField(upload_to="event/uploads/images/")
@@ -157,13 +118,6 @@ class Event(models.Model):
         """
         return f'{self.event_title}'
     
-    def get_absolute_url(self):
-        """get an instance's absolute url
-
-        Returns:
-            str: instance's url
-        """
-        return reverse('ems:event', kwargs={'slug': self.slug})
 
     def get_image_url(self):
         """get absolute url for image/avatar
@@ -192,14 +146,6 @@ class SponsorOrPartner(models.Model):
         """
         return self.name
     
-    def get_absolute_url(self):
-        """get an instance's absolute url
-
-        Returns:
-            str: instance's url
-        """
-        return reverse("ems:sponsor_or_partner", kwargs={"slug": self.slug})
-    
     def get_logo_url(self) -> str:
         """get absolute url for logo
 
@@ -227,14 +173,6 @@ class Attendee(models.Model):
         """
         full_name = f'{self.attendee.first_name} {self.attendee.last_name}'
         return full_name
-    
-    def get_absolute_url(self):
-        """get an instance's absolute url
-
-        Returns:
-            str: instance's url
-        """
-        return reverse("ems:attendee", kwargs={"slug": self.slug})
 
     class Meta:
         db_table = 'attendees'
